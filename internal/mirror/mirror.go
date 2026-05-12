@@ -368,12 +368,19 @@ func (m *Mirror) SetLastSync(repoKey string, t time.Time) {
 
 // gitEnv returns environment variables for git commands.
 // Uses GIT_CONFIG_* env vars to pass auth without persisting to repo config.
+//
+// GIT_CONFIG_GLOBAL / GIT_CONFIG_SYSTEM default to /dev/null for security
+// (prevents accidental use of host-level git configuration). Operators can
+// override by setting these env vars on the proxy process, e.g. to inject
+// a custom gitconfig with url.insteadOf rewriting fetches through a mirror.
 func gitEnv(authHeader string) []string {
-	env := append(os.Environ(),
-		"GIT_TERMINAL_PROMPT=0",
-		"GIT_CONFIG_GLOBAL=/dev/null",
-		"GIT_CONFIG_SYSTEM=/dev/null",
-	)
+	env := append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	if _, ok := os.LookupEnv("GIT_CONFIG_GLOBAL"); !ok {
+		env = append(env, "GIT_CONFIG_GLOBAL=/dev/null")
+	}
+	if _, ok := os.LookupEnv("GIT_CONFIG_SYSTEM"); !ok {
+		env = append(env, "GIT_CONFIG_SYSTEM=/dev/null")
+	}
 	if authHeader != "" {
 		env = append(env,
 			"GIT_CONFIG_COUNT=1",
