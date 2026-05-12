@@ -3,7 +3,7 @@
 ARG GO_VERSION=1.25
 ARG ALPINE_VERSION=3.20
 
-FROM --platform=$BUILDPLATFORM swr.cn-north-4.myhuaweicloud.com/opensourceway/golang:${GO_VERSION} AS builder
+FROM --platform=$BUILDPLATFORM docker.m.daocloud.io/library/golang:${GO_VERSION} AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -20,7 +20,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" \
     -o /out/smart-git-proxy ./cmd/proxy
 
-FROM swr.cn-north-4.myhuaweicloud.com/opensourceway/alpine:${ALPINE_VERSION}
+FROM docker.m.daocloud.io/library/alpine:${ALPINE_VERSION}
 
 ARG VERSION=v0.2.6
 
